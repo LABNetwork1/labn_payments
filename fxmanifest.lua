@@ -4,10 +4,10 @@ game "gta5"
 
 lua54 "yes"
 
-shared_scripts {"@labn_core/imports.lua", "@ox_lib/init.lua"}
+shared_scripts {"@es_extended/imports.lua", "@ox_lib/init.lua"}
 
 server_scripts {"@oxmysql/lib/MySQL.lua", "server/*.lua"}
 
 client_scripts {"client/*.lua", "config.lua"}
 
-dependency "labn_core"
+dependency "es_extended"
