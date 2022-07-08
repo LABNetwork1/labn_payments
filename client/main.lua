@@ -1,10 +1,22 @@
+RegisterNetEvent("esx:playerLoaded")
+AddEventHandler("esx:playerLoaded", function(xPlayer)
+	ESX.PlayerData = xPlayer
+	ESX.PlayerLoaded = true
+end)
+
+RegisterNetEvent("esx:onPlayerLogout")
+AddEventHandler("esx:onPlayerLogout", function()
+	ESX.PlayerLoaded = false
+	ESX.PlayerData = {}
+end)
+
 local isDead = false
 
 RegisterNetEvent("labn_payments:client:showMenuPayments", function()
-    if not isDead then
+    if ESX.PlayerLoaded and not isDead then
+        local jobName = ""
         local isAllowed = false
         local isAllowed1 = false
-        local jobName = ""
         for k, v in pairs(Config.SocietyEmergencys) do
             if v == ESX.PlayerData.job.name then
                 jobName = v
@@ -26,12 +38,13 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
         table.insert(elements, {
             title = "📑 Fines",
             description = "View My Unpaid Fines",
-            event = "labn_payments:client:ShowBillsMenu"
+            event = "labn_payments:client:ShowFinesMenu"
         })
         if Config.SocietyEmergencys and isAllowed then
             table.insert(elements, {
                 title = "📑 Create Fine",
                 description = "Create Fine to the Nearest Civilian",
+                event = "labn_payments:client:CreateFine"
             })
             table.insert(elements, {
                 title = "📑 Check Fines",
@@ -41,6 +54,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
             table.insert(elements, {
                 title = "📄 Create Invoice",
                 description = "Create Invoice to Nearest Civilian",
+                event = "labn_payments:client:CreateInvoice"
             })
             table.insert(elements, {
                 title = "📄 Check Invoices",
@@ -53,7 +67,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
 end)
 
 RegisterNetEvent("labn_payments:client:ShowInvoicesMenu", function()
-    if not isDead then
+    if ESX.PlayerLoaded and not isDead then
         ESX.TriggerServerCallback("labn_payments:server:getInvoices", function(invoices)
             if #invoices > 0 then
                 ESX.UI.Menu.CloseAll()
@@ -75,8 +89,23 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesMenu", function()
     end
 end)
 
+RegisterNetEvent("labn_payments:client:CreateInvoice", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, playerDistance = ESX.Game.GetClosestPlayer()
+		target = GetPlayerServerId(closestPlayer)
+        if closestPlayer == -1 or playerDistance > 3.0 then
+            local input = lib.inputDialog("Criar Fatura", {"Invoice Label", "Invoice Amount"})
+            if input then
+                local Invoicelabel = input[1]
+                local InvoiceAmount = tonumber(input[2])
+                TriggerServerEvent("labn_payments:server:sendInvoice", target, Invoicelabel, InvoiceAmount)
+            end
+        end
+    end
+end)
+
 RegisterNetEvent("labn_payments:client:payInvoices", function(data)
-    if not isDead then
+    if ESX.PlayerLoaded and not isDead then
         selectedInvoice = data.invoiceId
         local alert = lib.alertDialog({
             header = "Do you really want to pay that invoice?",
@@ -91,22 +120,22 @@ RegisterNetEvent("labn_payments:client:payInvoices", function(data)
     end
 end)
 
-RegisterNetEvent("labn_payments:client:ShowBillsMenu", function()
-    if not isDead then
-        ESX.TriggerServerCallback("labn_payments:server:getBills", function(bills)
-            if #bills > 0 then
+RegisterNetEvent("labn_payments:client:ShowFinesMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        ESX.TriggerServerCallback("labn_payments:server:getFines", function(fines)
+            if #fines > 0 then
                 ESX.UI.Menu.CloseAll()
                 local elements = {}
-                for k, v in ipairs(bills) do
+                for k, v in ipairs(fines) do
                     table.insert(elements, {
                         title = ""..v.label.."",
                         description = "Fine Amount: $"..ESX.Math.GroupDigits(v.amount).."",
-                        event = "labn_payments:client:payBills",
-                        args = {billId = v.id}
+                        event = "labn_payments:client:payFines",
+                        args = {fineId = v.id}
                     })
                 end
-                lib.registerContext({id = "show_bills_menu", title = "Unpaid Fines", menu = "show_payments_menu", options = elements})
-                lib.showContext("show_bills_menu")
+                lib.registerContext({id = "show_fines_menu", title = "Unpaid Fines", menu = "show_payments_menu", options = elements})
+                lib.showContext("show_fines_menu")
             else
                 lib.notify({description = "You Have No Fines!", type = "inform"})
             end
@@ -114,18 +143,33 @@ RegisterNetEvent("labn_payments:client:ShowBillsMenu", function()
     end
 end)
 
-RegisterNetEvent("labn_payments:client:payBills", function(data)
-    if not isDead then
-        selectedBill = data.billId
+RegisterNetEvent("labn_payments:client:CreateFine", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, playerDistance = ESX.Game.GetClosestPlayer()
+		target = GetPlayerServerId(closestPlayer)
+        if closestPlayer == -1 or playerDistance > 3.0 then
+            local input = lib.inputDialog("Criar Multa", {"Fine Label", "Fine Amount"})
+            if input then
+                local labelFine = input[1]
+                local amountFine = tonumber(input[2])
+                TriggerServerEvent("labn_payments:server:sendFine", target, labelFine, amountFine)
+            end
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:payFines", function(data)
+    if ESX.PlayerLoaded and not isDead then
+        selectedFine = data.fineId
         local alert = lib.alertDialog({
             header = "Do you really want to pay that fine?",
             centered = true,
             cancel = true
         })
         if alert == "confirm" then
-            ESX.TriggerServerCallback("labn_payments:server:payBill", function()
-                TriggerEvent("labn_payments:client:ShowBillsMenu")
-            end, selectedBill)
+            ESX.TriggerServerCallback("labn_payments:server:payFine", function()
+                TriggerEvent("labn_payments:client:ShowFinesMenu")
+            end, selectedFine)
         end
     end
 end)
@@ -139,7 +183,7 @@ AddEventHandler("esx:onPlayerSpawn", function(spawn)
 end)
 
 RegisterCommand("showMenuPayments", function()
-	if not isDead then
+	if ESX.PlayerLoaded and not isDead then
         TriggerEvent("labn_payments:client:showMenuPayments")
 	end
 end)
