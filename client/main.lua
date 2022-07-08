@@ -49,6 +49,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
             table.insert(elements, {
                 title = "📑 Check Fines",
                 description = "Check Fines from the Nearest Civilian",
+                event = "labn_payments:client:ShowFinesTargetMenu"
             })
         elseif Config.SocietyBarsAndRestaurants and isAllowed1 then
             table.insert(elements, {
@@ -59,6 +60,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
             table.insert(elements, {
                 title = "📄 Check Invoices",
                 description = "Check Invoices from the nearest Civilian",
+                event = "labn_payments:client:ShowInvoicesTargetMenu"
             })
         end
         lib.registerContext({id = "show_payments_menu", title = "📑 Menu (Invoices / Fines)", options = elements})
@@ -91,15 +93,19 @@ end)
 
 RegisterNetEvent("labn_payments:client:CreateInvoice", function()
     if ESX.PlayerLoaded and not isDead then
-        local closestPlayer, playerDistance = ESX.Game.GetClosestPlayer()
-		target = GetPlayerServerId(closestPlayer)
-        if closestPlayer == -1 or playerDistance > 3.0 then
-            local input = lib.inputDialog("Criar Fatura", {"Invoice Label", "Invoice Amount"})
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            local input = lib.inputDialog("Create Invoice", {"Invoice Label", "Invoice Amount"})
             if input then
                 local Invoicelabel = input[1]
                 local InvoiceAmount = tonumber(input[2])
-                TriggerServerEvent("labn_payments:server:sendInvoice", target, Invoicelabel, InvoiceAmount)
+                if InvoiceAmount == 0 then
+                    return lib.notify({description = "Invalid Amount!", type = "error"})
+                end
+                TriggerServerEvent("labn_payments:server:sendInvoice", GetPlayerServerId(closestPlayer), Invoicelabel, InvoiceAmount)
             end
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
         end
     end
 end)
@@ -116,6 +122,31 @@ RegisterNetEvent("labn_payments:client:payInvoices", function(data)
             ESX.TriggerServerCallback("labn_payments:server:payInvoice", function()
                 TriggerEvent("labn_payments:client:ShowInvoicesMenu")
             end, selectedInvoice)
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowInvoicesTargetMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            ESX.TriggerServerCallback("labn_payments:server:getTargetInvoices", function(invoices)
+                if #invoices > 0 then
+                    ESX.UI.Menu.CloseAll()
+                    local elements = {}
+                    for k, invoice in ipairs(invoices) do
+                        table.insert(elements, {
+                            title = ""..invoice.label.."",
+                            description = "Invoice Amount: $"..ESX.Math.GroupDigits(invoice.amount).."",
+                            args = {invoiceId = invoice.id}
+                        })
+                    end
+                    lib.registerContext({id = "show_invoices_target_menu", title = "Unpaid Invoices", menu = "show_payments_menu", options = elements})
+                    lib.showContext("show_invoices_target_menu")
+                else
+                    lib.notify({description = "This Civilian has no Invoice!", type = "inform"})
+                end
+            end, GetPlayerServerId(closestPlayer))
         end
     end
 end)
@@ -145,15 +176,19 @@ end)
 
 RegisterNetEvent("labn_payments:client:CreateFine", function()
     if ESX.PlayerLoaded and not isDead then
-        local closestPlayer, playerDistance = ESX.Game.GetClosestPlayer()
-		target = GetPlayerServerId(closestPlayer)
-        if closestPlayer == -1 or playerDistance > 3.0 then
-            local input = lib.inputDialog("Criar Multa", {"Fine Label", "Fine Amount"})
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            local input = lib.inputDialog("Create Fine", {"Fine Label", "Fine Amount"})
             if input then
                 local labelFine = input[1]
                 local amountFine = tonumber(input[2])
-                TriggerServerEvent("labn_payments:server:sendFine", target, labelFine, amountFine)
+                if amountFine == 0 then
+                    return lib.notify({description = "Invalid Amount!", type = "error"})
+                end
+                TriggerServerEvent("labn_payments:server:sendFine", GetPlayerServerId(closestPlayer), labelFine, amountFine)
             end
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
         end
     end
 end)
@@ -170,6 +205,31 @@ RegisterNetEvent("labn_payments:client:payFines", function(data)
             ESX.TriggerServerCallback("labn_payments:server:payFine", function()
                 TriggerEvent("labn_payments:client:ShowFinesMenu")
             end, selectedFine)
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowFinesTargetMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            ESX.TriggerServerCallback("labn_payments:server:getTargetFines", function(fines)
+                if #fines > 0 then
+                    ESX.UI.Menu.CloseAll()
+                    local elements = {}
+                    for k, fine in ipairs(fines) do
+                        table.insert(elements, {
+                            title = ""..fine.label.."",
+                            description = "Fine Amount: $"..ESX.Math.GroupDigits(fine.amount).."",
+                            args = {fineId = fine.id}
+                        })
+                    end
+                    lib.registerContext({id = "show_fines_target_menu", title = "Unpaid Fines", menu = "show_payments_menu", options = elements})
+                    lib.showContext("show_fines_target_menu")
+                else
+                    lib.notify({description = "This Civilian has no Fines!", type = "inform"})
+                end
+            end, GetPlayerServerId(closestPlayer))
         end
     end
 end)

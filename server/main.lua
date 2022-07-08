@@ -34,6 +34,28 @@ ESX.RegisterServerCallback("labn_payments:server:getInvoices", function(source, 
 	end)
 end)
 
+ESX.RegisterServerCallback("labn_payments:server:getTargetFines", function(source, cb, target)
+	local xPlayer = ESX.GetPlayerFromId(target)
+	if xPlayer then
+		MySQL.query("SELECT amount, id, status, type, label FROM labn_payments WHERE identifier = ? AND status = 'unpaid' AND type = 'multa'", {xPlayer.identifier}, function(result)
+			cb(result)
+		end)
+	else
+		cb({})
+	end
+end)
+
+ESX.RegisterServerCallback("labn_payments:server:getTargetInvoices", function(source, cb, target)
+	local xPlayer = ESX.GetPlayerFromId(target)
+	if xPlayer then
+		MySQL.query("SELECT amount, id, status, type, label FROM labn_payments WHERE identifier = ? AND status = 'unpaid' AND type = 'fatura'", {xPlayer.identifier}, function(result)
+			cb(result)
+		end)
+	else
+		cb({})
+	end
+end)
+
 ESX.RegisterServerCallback("labn_payments:server:payFine", function(source, cb, fineId)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	MySQL.single("SELECT amount FROM labn_payments WHERE id = ?", {fineId}, function(result)
