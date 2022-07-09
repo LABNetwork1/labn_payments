@@ -49,7 +49,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
             table.insert(elements, {
                 title = "📑 Check Fines",
                 description = "Check Fines from the Nearest Civilian",
-                event = "labn_payments:client:ShowFinesTargetMenu"
+                event = "labn_payments:client:ShowFinesTargetStatusMenu"
             })
         elseif Config.SocietyBarsAndRestaurants and isAllowed1 then
             table.insert(elements, {
@@ -308,7 +308,30 @@ RegisterNetEvent("labn_payments:client:payFines", function(data)
     end
 end)
 
-RegisterNetEvent("labn_payments:client:ShowFinesTargetMenu", function()
+RegisterNetEvent("labn_payments:client:ShowFinesTargetStatusMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            local elements = {}
+            table.insert(elements, {
+                title = "📑 Unpaid Fines",
+                description = "View Target Unpaid Fines",
+                event = "labn_payments:client:ShowFinesTargetUnpaidMenu"
+            })
+            table.insert(elements, {
+                title = "📑 Paid Fines",
+                description = "View Target Paid Fines",
+                event = "labn_payments:client:ShowFinesTargetPaidMenu"
+            })
+            lib.registerContext({id = "show_fines_target_status_menu", title = "📑 Fines", menu = "show_payments_menu", options = elements})
+            lib.showContext("show_fines_target_status_menu")
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowFinesTargetUnpaidMenu", function()
     if ESX.PlayerLoaded and not isDead then
         local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
@@ -326,8 +349,39 @@ RegisterNetEvent("labn_payments:client:ShowFinesTargetMenu", function()
                             args = {fineId = fine.id}
                         })
                     end
-                    lib.registerContext({id = "show_fines_target_menu", title = "Unpaid Fines", menu = "show_payments_menu", options = elements})
-                    lib.showContext("show_fines_target_menu")
+                    lib.registerContext({id = "show_fines_target_unpaid_menu", title = "Unpaid Fines", menu = "show_fines_target_status_menu", options = elements})
+                    lib.showContext("show_fines_target_unpaid_menu")
+                else
+                    lib.notify({description = "This Civilian has no Fines!", type = "inform"})
+                end
+            end, GetPlayerServerId(closestPlayer))
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowFinesTargetPaidMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            ESX.TriggerServerCallback("labn_payments:server:getTargetFinesPaid", function(fines)
+                if #fines > 0 then
+                    ESX.UI.Menu.CloseAll()
+                    local elements = {}
+                    for k, fine in ipairs(fines) do
+                        table.insert(elements, {
+                            title = ""..fine.label.."",
+                            description = "Fine Amount: $"..ESX.Math.GroupDigits(fine.amount).."",
+                            metadata = {
+                                {label = "Send Date", value = fine.send_date},
+                                {label = "Paid Date", value = fine.paid_date},
+                            },
+                            args = {fineId = fine.id}
+                        })
+                    end
+                    lib.registerContext({id = "show_fines_target_paid_menu", title = "Unpaid Fines", menu = "show_fines_target_status_menu", options = elements})
+                    lib.showContext("show_fines_target_paid_menu")
                 else
                     lib.notify({description = "This Civilian has no Fines!", type = "inform"})
                 end
