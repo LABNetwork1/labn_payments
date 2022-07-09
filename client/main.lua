@@ -258,7 +258,7 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesTargetPaidMenu", function()
                             description = "Invoice Amount: $"..ESX.Math.GroupDigits(invoice.amount).."",
                             metadata = {
                                 {label = "Send Date", value = invoice.send_date},
-                                {label = "Paid Date", value = v.paid_date},
+                                {label = "Paid Date", value = invoice.paid_date},
                             },
                             args = {invoiceId = invoice.id}
                         })
