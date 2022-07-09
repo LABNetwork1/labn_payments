@@ -168,7 +168,7 @@ RegisterNetEvent("labn_payments:client:CreateInvoice", function()
                 if InvoiceAmount <= 0 then
                     return lib.notify({description = "Invalid Amount!", type = "error"})
                 end
-                TriggerServerEvent("labn_payments:server:sendInvoice", GetPlayerServerId(closestPlayer), Invoicelabel, InvoiceAmount)
+                TriggerServerEvent("labn_payments:server:sendInvoice", GetPlayerServerId(closestPlayer), "society_"..ESX.PlayerData.job.name.."", Invoicelabel, InvoiceAmount)
             end
         else
             lib.notify({description = "No Civilians Nearby!", type = "error"})
@@ -341,7 +341,7 @@ RegisterNetEvent("labn_payments:client:CreateCustomFine", function()
                 if amountFine == 0 then
                     return lib.notify({description = "Invalid Amount!", type = "error"})
                 end
-                TriggerServerEvent("labn_payments:server:sendFine", GetPlayerServerId(closestPlayer), labelFine, amountFine)
+                TriggerServerEvent("labn_payments:server:sendFine", GetPlayerServerId(closestPlayer), "society_"..ESX.PlayerData.job.name.."", labelFine, amountFine)
             end
         else
             lib.notify({description = "No Civilians Nearby!", type = "error"})
