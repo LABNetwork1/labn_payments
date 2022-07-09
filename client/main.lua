@@ -117,6 +117,7 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesMenu", function()
                         event = "labn_payments:client:payInvoices",
                         metadata = {
                             {label = "Send Date", value = v.send_date},
+                            {label = "Paid Date", value = v.paid_date},
                         },
                         args = {invoiceId = v.id}
                     })
@@ -228,6 +229,7 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesTargetUnpaidMenu", function()
                             description = "Invoice Amount: $"..ESX.Math.GroupDigits(invoice.amount).."",
                             metadata = {
                                 {label = "Send Date", value = invoice.send_date},
+                                {label = "Paid Date", value = invoice.paid_date},
                             },
                             args = {invoiceId = invoice.id}
                         })
@@ -288,6 +290,7 @@ RegisterNetEvent("labn_payments:client:ShowFinesMenu", function()
                         event = "labn_payments:client:payFines",
                         metadata = {
                             {label = "Send Date", value = v.send_date},
+                            {label = "Paid Date", value = v.paid_date},
                         },
                         args = {fineId = v.id}
                     })
@@ -399,6 +402,7 @@ RegisterNetEvent("labn_payments:client:ShowFinesTargetUnpaidMenu", function()
                             description = "Fine Amount: $"..ESX.Math.GroupDigits(fine.amount).."",
                             metadata = {
                                 {label = "Send Date", value = fine.send_date},
+                                {label = "Paid Date", value = fine.paid_date},
                             },
                             args = {fineId = fine.id}
                         })
