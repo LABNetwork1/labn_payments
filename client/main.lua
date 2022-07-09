@@ -60,7 +60,7 @@ RegisterNetEvent("labn_payments:client:showMenuPayments", function()
             table.insert(elements, {
                 title = "📄 Check Invoices",
                 description = "Check Invoices from the nearest Civilian",
-                event = "labn_payments:client:ShowInvoicesTargetMenu"
+                event = "labn_payments:client:ShowInvoicesTargetStatusMenu"
             })
         end
         lib.registerContext({id = "show_payments_menu", title = "📑 Menu (Invoices / Fines)", options = elements})
@@ -191,7 +191,30 @@ RegisterNetEvent("labn_payments:client:payInvoices", function(data)
     end
 end)
 
-RegisterNetEvent("labn_payments:client:ShowInvoicesTargetMenu", function()
+RegisterNetEvent("labn_payments:client:ShowInvoicesTargetStatusMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            local elements = {}
+            table.insert(elements, {
+                title = "📄 Unpaid Invoices",
+                description = "View Target Unpaid Invoices",
+                event = "labn_payments:client:ShowInvoicesTargetUnpaidMenu"
+            })
+            table.insert(elements, {
+                title = "📄 Paid Invoices",
+                description = "View Target Paid Invoices",
+                event = "labn_payments:client:ShowInvoicesTargetPaidMenu"
+            })
+            lib.registerContext({id = "show_invoices_target_status_menu", title = "📄 Invoices", menu = "show_payments_menu", options = elements})
+            lib.showContext("show_invoices_target_status_menu")
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowInvoicesTargetUnpaidMenu", function()
     if ESX.PlayerLoaded and not isDead then
         local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
@@ -209,8 +232,39 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesTargetMenu", function()
                             args = {invoiceId = invoice.id}
                         })
                     end
-                    lib.registerContext({id = "show_invoices_target_menu", title = "Unpaid Invoices", menu = "show_payments_menu", options = elements})
-                    lib.showContext("show_invoices_target_menu")
+                    lib.registerContext({id = "show_invoices_target_unpaid_menu", title = "Unpaid Invoices", menu = "show_invoices_target_status_menu", options = elements})
+                    lib.showContext("show_invoices_target_unpaid_menu")
+                else
+                    lib.notify({description = "This Civilian has no Invoice!", type = "inform"})
+                end
+            end, GetPlayerServerId(closestPlayer))
+        else
+            lib.notify({description = "No Civilians Nearby!", type = "error"})
+        end
+    end
+end)
+
+RegisterNetEvent("labn_payments:client:ShowInvoicesTargetPaidMenu", function()
+    if ESX.PlayerLoaded and not isDead then
+        local closestPlayer, closestDistance = ESX.Game.GetClosestPlayer()
+		if closestPlayer ~= -1 and closestDistance <= 3.0 then
+            ESX.TriggerServerCallback("labn_payments:server:getTargetInvoicesPaid", function(invoices)
+                if #invoices > 0 then
+                    ESX.UI.Menu.CloseAll()
+                    local elements = {}
+                    for k, invoice in ipairs(invoices) do
+                        table.insert(elements, {
+                            title = ""..invoice.label.."",
+                            description = "Invoice Amount: $"..ESX.Math.GroupDigits(invoice.amount).."",
+                            metadata = {
+                                {label = "Send Date", value = invoice.send_date},
+                                {label = "Paid Date", value = v.paid_date},
+                            },
+                            args = {invoiceId = invoice.id}
+                        })
+                    end
+                    lib.registerContext({id = "show_invoices_target_paid_menu", title = "Paid Invoices", menu = "show_invoices_target_status_menu", options = elements})
+                    lib.showContext("show_invoices_target_paid_menu")
                 else
                     lib.notify({description = "This Civilian has no Invoice!", type = "inform"})
                 end
