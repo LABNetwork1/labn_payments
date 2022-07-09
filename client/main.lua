@@ -108,7 +108,6 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesMenu", function()
     if ESX.PlayerLoaded and not isDead then
         ESX.TriggerServerCallback("labn_payments:server:getInvoices", function(invoices)
             if #invoices > 0 then
-                ESX.UI.Menu.CloseAll()
                 local elements = {}
                 for k, v in ipairs(invoices) do
                     table.insert(elements, {
@@ -135,7 +134,6 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesPaidMenu", function()
     if ESX.PlayerLoaded and not isDead then
         ESX.TriggerServerCallback("labn_payments:server:getInvoicesPaid", function(invoices)
             if #invoices > 0 then
-                ESX.UI.Menu.CloseAll()
                 local elements = {}
                 for k, v in ipairs(invoices) do
                     table.insert(elements, {
@@ -221,7 +219,6 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesTargetUnpaidMenu", function()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
             ESX.TriggerServerCallback("labn_payments:server:getTargetInvoices", function(invoices)
                 if #invoices > 0 then
-                    ESX.UI.Menu.CloseAll()
                     local elements = {}
                     for k, invoice in ipairs(invoices) do
                         table.insert(elements, {
@@ -252,7 +249,6 @@ RegisterNetEvent("labn_payments:client:ShowInvoicesTargetPaidMenu", function()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
             ESX.TriggerServerCallback("labn_payments:server:getTargetInvoicesPaid", function(invoices)
                 if #invoices > 0 then
-                    ESX.UI.Menu.CloseAll()
                     local elements = {}
                     for k, invoice in ipairs(invoices) do
                         table.insert(elements, {
@@ -281,7 +277,6 @@ RegisterNetEvent("labn_payments:client:ShowFinesMenu", function()
     if ESX.PlayerLoaded and not isDead then
         ESX.TriggerServerCallback("labn_payments:server:getFines", function(fines)
             if #fines > 0 then
-                ESX.UI.Menu.CloseAll()
                 local elements = {}
                 for k, v in ipairs(fines) do
                     table.insert(elements, {
@@ -308,7 +303,6 @@ RegisterNetEvent("labn_payments:client:ShowFinesPaidMenu", function()
     if ESX.PlayerLoaded and not isDead then
         ESX.TriggerServerCallback("labn_payments:server:getFinesPaid", function(fines)
             if #fines > 0 then
-                ESX.UI.Menu.CloseAll()
                 local elements = {}
                 for k, v in ipairs(fines) do
                     table.insert(elements, {
@@ -394,7 +388,6 @@ RegisterNetEvent("labn_payments:client:ShowFinesTargetUnpaidMenu", function()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
             ESX.TriggerServerCallback("labn_payments:server:getTargetFines", function(fines)
                 if #fines > 0 then
-                    ESX.UI.Menu.CloseAll()
                     local elements = {}
                     for k, fine in ipairs(fines) do
                         table.insert(elements, {
@@ -425,7 +418,6 @@ RegisterNetEvent("labn_payments:client:ShowFinesTargetPaidMenu", function()
 		if closestPlayer ~= -1 and closestDistance <= 3.0 then
             ESX.TriggerServerCallback("labn_payments:server:getTargetFinesPaid", function(fines)
                 if #fines > 0 then
-                    ESX.UI.Menu.CloseAll()
                     local elements = {}
                     for k, fine in ipairs(fines) do
                         table.insert(elements, {
