@@ -344,7 +344,7 @@ RegisterNetEvent("labn_payments:client:CreateCustomFine", function()
             if input then
                 local labelFine = input[1]
                 local amountFine = tonumber(input[2])
-                if amountFine == 0 then
+                if amountFine <= 0 then
                     return lib.notify({description = "Invalid Amount!", type = "error"})
                 end
                 TriggerServerEvent("labn_payments:server:sendFine", GetPlayerServerId(closestPlayer), labelFine, amountFine, PlayerData.job.name)
