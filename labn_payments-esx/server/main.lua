@@ -3,7 +3,7 @@ AddEventHandler("labn_payments:server:sendFine", function(playerId, label, amoun
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
 	if xTarget then
-		TriggerEvent("labn_addonaccount:getSharedAccount", society, function(account)
+		TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 			if account then
 				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
 					TriggerClientEvent("ox_lib:notify", xTarget.source, {description = "You received a fine", type = "inform"})
@@ -18,7 +18,7 @@ AddEventHandler("labn_payments:server:sendInvoice", function(playerId, label, am
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
 	if xTarget then
-		TriggerEvent("labn_addonaccount:getSharedAccount", society, function(account)
+		TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 			if account then
 				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
 					TriggerClientEvent("ox_lib:notify", xTarget.source, {description = "You received an Invoice", type = "inform"})
@@ -106,7 +106,7 @@ ESX.RegisterServerCallback("labn_payments:server:payFine", function(source, cb, 
 		if result then
 			local amount = result.amount
 			local society = result.society
-			TriggerEvent("labn_addonaccount:getSharedAccount", society, function(account)
+			TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 				if xPlayer.getMoney() >= amount then
 					MySQL.update("UPDATE labn_payments SET status = ?, paid_date = ? WHERE id = ?", {"paid", os.date("%m-%m-%Y %H:%M:%S"), fineId}, function(affectedRows)
 						xPlayer.removeMoney(amount)
@@ -136,7 +136,7 @@ ESX.RegisterServerCallback("labn_payments:server:payInvoice", function(source, c
 		if result then
 			local amount = result.amount
 			local society = result.society
-			TriggerEvent("labn_addonaccount:getSharedAccount", society, function(account)
+			TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 				if xPlayer.getMoney() >= amount then
 					MySQL.update("UPDATE labn_payments SET status = ?, paid_date = ? WHERE id = ?", {"paid", os.date("%m-%m-%Y %H:%M:%S"), invoiceId}, function(affectedRows)
 						xPlayer.removeMoney(amount)
