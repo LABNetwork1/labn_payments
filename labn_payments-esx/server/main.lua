@@ -6,7 +6,7 @@ AddEventHandler("labn_payments:server:sendFine", function(playerId, label, amoun
 		TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 			if account then
 				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
-					TriggerClientEvent("ox_lib:notify", xTarget.source, {description = "You received a fine", type = "inform"})
+					TriggerClientEvent("ox_lib:notify", xTarget.playerId, {description = "You received a fine", type = "inform"})
 				end)
 			end
 		end)
@@ -21,7 +21,7 @@ AddEventHandler("labn_payments:server:sendInvoice", function(playerId, label, am
 		TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 			if account then
 				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
-					TriggerClientEvent("ox_lib:notify", xTarget.source, {description = "You received an Invoice", type = "inform"})
+					TriggerClientEvent("ox_lib:notify", xTarget.playerId, {description = "You received an Invoice", type = "inform"})
 				end)
 			end
 		end)
