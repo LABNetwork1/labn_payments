@@ -20,7 +20,7 @@ AddEventHandler("labn_payments:server:sendInvoice", function(playerId, label, am
 	if xTarget then
 		TriggerEvent("esx_addonaccount:getSharedAccount", society, function(account)
 			if account then
-				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
+				MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"invoice", xTarget.identifier, xPlayer.identifier, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
 					TriggerClientEvent("ox_lib:notify", xTarget.playerId, {description = "You received an Invoice", type = "inform"})
 				end)
 			end
