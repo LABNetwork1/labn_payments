@@ -16,7 +16,7 @@ AddEventHandler("labn_payments:server:sendInvoice", function(playerId, label, am
 	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local xTarget = QBCore.Functions.GetPlayer(playerId)
 	if xTarget then
-		MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"fine", xTarget.PlayerData.citizenid, xPlayer.PlayerData.citizenid, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
+		MySQL.insert("INSERT INTO labn_payments (type, identifier, sender, label, amount, send_date, status, society) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", {"invoice", xTarget.PlayerData.citizenid, xPlayer.PlayerData.citizenid, label, amount, os.date("%m-%m-%Y %H:%M:%S"), "unpaid", society}, function(rowsChanged)
 			TriggerClientEvent("ox_lib:notify", xTarget.playerId, {description = "You received an Invoice", type = "inform"})
 		end)
 	end
